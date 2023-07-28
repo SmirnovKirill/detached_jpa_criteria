@@ -1225,24 +1225,12 @@ public enum DetachedExpressionType {
     DetachedInNotTypeSafeImpl<?, ?> detachedIn = (DetachedInNotTypeSafeImpl<?, ?>) expressionToConvert;
     CriteriaBuilder.In<Object> jpaIn = context.getCriteriaBuilder().in(convertedArguments.get(0));
 
-    if (shouldReplaceInValues(detachedIn, context)) {
-      jpaIn.value(context.getInValuesToReplace());
-    } else {
-      for (DetachedExpression<?> value : detachedIn.getValues()) {
-        DetachedExpressionCommonImpl<?> castedValue = (DetachedExpressionCommonImpl<?>) value;
-        jpaIn.value(castedValue.toJpaExpression(context));
-      }
+    for (DetachedExpression<?> value : detachedIn.getValues()) {
+      DetachedExpressionCommonImpl<?> castedValue = (DetachedExpressionCommonImpl<?>) value;
+      jpaIn.value(castedValue.toJpaExpression(context));
     }
 
     return jpaIn;
-  }
-
-  private static boolean shouldReplaceInValues(DetachedInNotTypeSafeImpl<?, ?> detachedIn, ExpressionConverterContext context) {
-    if (context.getInValuesToReplace() == null || context.getInValuesToReplace().isEmpty()) {
-      return false;
-    }
-
-    return !detachedIn.isValueParameter();
   }
 
   private static Expression<?> convertCoalesce(

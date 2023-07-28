@@ -196,8 +196,7 @@ public class DetachedCriteriaSubqueryImpl<T> implements DetachedCriteriaSubquery
     Set<QueryCopyPart> copyPartSet = Arrays.stream(copyParts).collect(Collectors.toSet());
 
     if (copyPartSet.contains(QueryCopyPart.COPY_WHERE) || copyPartSet.contains(QueryCopyPart.COPY_ALL_FIELDS)) {
-      if (otherCriteria instanceof CriteriaQueryWithWhere) {
-        CriteriaQueryWithWhere castedCriteria = (CriteriaQueryWithWhere) otherCriteria;
+      if (otherCriteria instanceof CriteriaQueryWithWhere castedCriteria) {
         this.whereExpressions.clear();
         this.whereExpressions.addAll(castedCriteria.getWhereExpressions());
         this.wherePredicates.clear();
@@ -205,28 +204,24 @@ public class DetachedCriteriaSubqueryImpl<T> implements DetachedCriteriaSubquery
       }
     }
     if (copyPartSet.contains(QueryCopyPart.COPY_DISTINCT) || copyPartSet.contains(QueryCopyPart.COPY_ALL_FIELDS)) {
-      if (otherCriteria instanceof CriteriaQueryWithDistinct) {
-        CriteriaQueryWithDistinct castedCriteria = (CriteriaQueryWithDistinct) otherCriteria;
+      if (otherCriteria instanceof CriteriaQueryWithDistinct castedCriteria) {
         this.distinct = castedCriteria.isDistinct();
       }
     }
     if (copyPartSet.contains(QueryCopyPart.COPY_JOIN) || copyPartSet.contains(QueryCopyPart.COPY_ALL_FIELDS)) {
-      if (otherCriteria instanceof CriteriaQueryWithJoins) {
-        CriteriaQueryWithJoins castedCriteria = (CriteriaQueryWithJoins) otherCriteria;
+      if (otherCriteria instanceof CriteriaQueryWithJoins castedCriteria) {
         this.joins.clear();
         this.joins.addAll(castedCriteria.getJoins());
       }
     }
     if (copyPartSet.contains(QueryCopyPart.COPY_GROUP_BY) || copyPartSet.contains(QueryCopyPart.COPY_ALL_FIELDS)) {
-      if (otherCriteria instanceof CriteriaQueryWithGrouping) {
-        CriteriaQueryWithGrouping castedCriteria = (CriteriaQueryWithGrouping) otherCriteria;
+      if (otherCriteria instanceof CriteriaQueryWithGrouping castedCriteria) {
         this.groupByExpressions.clear();
         this.groupByExpressions.addAll(castedCriteria.getGroupByExpressions());
       }
     }
     if (copyPartSet.contains(QueryCopyPart.COPY_HAVING) || copyPartSet.contains(QueryCopyPart.COPY_ALL_FIELDS)) {
-      if (otherCriteria instanceof CriteriaQueryWithGrouping) {
-        CriteriaQueryWithGrouping castedCriteria = (CriteriaQueryWithGrouping) otherCriteria;
+      if (otherCriteria instanceof CriteriaQueryWithGrouping castedCriteria) {
         this.havingExpressions.clear();
         this.havingExpressions.addAll(castedCriteria.getHavingExpressions());
         this.havingPredicates.clear();
@@ -321,7 +316,6 @@ public class DetachedCriteriaSubqueryImpl<T> implements DetachedCriteriaSubquery
         new PathContext(root, Map.of(), joinPaths),
         parentQueryContext.getPathContext(),
         parentQueryContext.getParameters(),
-        parentQueryContext.getInValuesToReplace(),
         criteriaBuilder,
         parentQueryContext.getEntityManager()
     );

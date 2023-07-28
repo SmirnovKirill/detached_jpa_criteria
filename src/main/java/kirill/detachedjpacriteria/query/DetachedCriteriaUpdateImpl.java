@@ -66,7 +66,52 @@ public class DetachedCriteriaUpdateImpl<T> extends AbstractDetachedCommonCriteri
 
   @Override
   public CriteriaUpdate<T> createJpaCriteriaQuery(EntityManager entityManager) {
-    return createJpaCriteriaQueryImpl(entityManager);
+    CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+
+    CriteriaUpdate<T> criteriaQuery = criteriaBuilder.createCriteriaUpdate(entityClass);
+    Root<?> root = criteriaQuery.from(entityClass);
+
+    ExpressionConverterContext context = new ExpressionConverterContext(
+        new PathContext(root, Map.of(), Map.of()),
+        null,
+        parameters,
+        criteriaBuilder,
+        entityManager
+    );
+    context.setCriteria(criteriaQuery);
+    applySetPais(criteriaQuery, context);
+    setWhere(criteriaQuery, context);
+
+    return criteriaQuery;
+  }
+
+  private <Y, X extends Y> void applySetPais(CriteriaUpdate<T> criteriaQuery, ExpressionConverterContext context) {
+    for (SetPair setPair : setPairs) {
+      switch (setPair.mode) {
+        case PATH_AND_SIMPLE_VALUE ->
+          //Норм что супрессим потому что проверки идут через сигнатуры вызовов.
+          //noinspection unchecked
+            criteriaQuery.set((Path<Y>) setPair.getAttributeAsPath().toJpaExpression(context), (X) setPair.value);
+        case PATH_AND_EXPRESSION_VALUE ->
+          //Норм что супрессим потому что проверки идут через сигнатуры вызовов.
+          //noinspection unchecked
+            criteriaQuery.set(
+                (Path<Y>) setPair.getAttributeAsPath().toJpaExpression(context),
+                (Expression<? extends Y>) setPair.getValueAsExpression().toJpaExpression(context)
+            );
+        case NAME_AND_SIMPLE_VALUE -> criteriaQuery.set((String) setPair.attribute, setPair.value);
+        default -> throw new IllegalStateException(String.format("Unexpected set pair mode %s", setPair.mode));
+      }
+    }
+  }
+
+  private void setWhere(CriteriaUpdate<T> criteriaQuery, ExpressionConverterContext context) {
+    Expression<Boolean> jpaExpression = getSingleJpaExpression(whereExpressions, wherePredicates, context).orElse(null);
+    if (jpaExpression != null) {
+      criteriaQuery.where(jpaExpression);
+    } else {
+      getSingleJpaPredicate(whereExpressions, wherePredicates, context).ifPresent(criteriaQuery::where);
+    }
   }
 
   @Override
@@ -86,16 +131,6 @@ public class DetachedCriteriaUpdateImpl<T> extends AbstractDetachedCommonCriteri
     DetachedCriteriaQuery<Long> selectCountQuery = DetachedCriteriaBuilder.selectCountDistinct(countExpression, entityClass);
     selectCountQuery.copyFromOtherCriteria(this, QueryCopyPart.COPY_WHERE, QueryCopyPart.COPY_PARAMS);
     return selectCountQuery;
-  }
-
-  @Override
-  public List<CriteriaUpdate<T>> createJpaCriteriaBatchQueries(EntityManager entityManager, int batchSize) {
-    return createJpaCriteriaBatchQueriesImpl(entityManager, batchSize);
-  }
-
-  @Override
-  public List<Query> createJpaBatchQueries(EntityManager entityManager, int batchSize) {
-    return createJpaBatchQueriesImpl(entityManager, batchSize);
   }
 
   @Override
@@ -119,62 +154,6 @@ public class DetachedCriteriaUpdateImpl<T> extends AbstractDetachedCommonCriteri
   public DetachedCriteriaUpdate<T> set(String attributeName, Object value) {
     setPairs.add(new SetPair(SetPairMode.NAME_AND_SIMPLE_VALUE, attributeName, value));
     return this;
-  }
-
-  @Override
-  CriteriaUpdate<T> createJpaCriteriaQuery(EntityManager entityManager, List<?> inValuesToReplace) {
-    CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-
-    CriteriaUpdate<T> criteriaQuery = criteriaBuilder.createCriteriaUpdate(entityClass);
-    Root<?> root = criteriaQuery.from(entityClass);
-
-    ExpressionConverterContext context = new ExpressionConverterContext(
-        new PathContext(root, Map.of(), Map.of()),
-        null,
-        parameters,
-        inValuesToReplace,
-        criteriaBuilder,
-        entityManager
-    );
-    context.setCriteria(criteriaQuery);
-    applySetPais(criteriaQuery, context);
-    setWhere(criteriaQuery, context);
-
-    return criteriaQuery;
-  }
-
-  private <Y, X extends Y> void applySetPais(CriteriaUpdate<T> criteriaQuery, ExpressionConverterContext context) {
-    for (SetPair setPair : setPairs) {
-      switch (setPair.mode) {
-        case PATH_AND_SIMPLE_VALUE:
-          //Норм что супрессим потому что проверки идут через сигнатуры вызовов.
-          //noinspection unchecked
-          criteriaQuery.set((Path<Y>) setPair.getAttributeAsPath().toJpaExpression(context), (X) setPair.value);
-          break;
-        case PATH_AND_EXPRESSION_VALUE:
-          //Норм что супрессим потому что проверки идут через сигнатуры вызовов.
-          //noinspection unchecked
-          criteriaQuery.set(
-              (Path<Y>) setPair.getAttributeAsPath().toJpaExpression(context),
-              (Expression<? extends Y>) setPair.getValueAsExpression().toJpaExpression(context)
-          );
-          break;
-        case NAME_AND_SIMPLE_VALUE:
-          criteriaQuery.set((String) setPair.attribute, setPair.value);
-          break;
-        default:
-          throw new IllegalStateException(String.format("Unexpected set pair mode %s", setPair.mode));
-      }
-    }
-  }
-
-  private void setWhere(CriteriaUpdate<T> criteriaQuery, ExpressionConverterContext context) {
-    Expression<Boolean> jpaExpression = getSingleJpaExpression(whereExpressions, wherePredicates, context).orElse(null);
-    if (jpaExpression != null) {
-      criteriaQuery.where(jpaExpression);
-    } else {
-      getSingleJpaPredicate(whereExpressions, wherePredicates, context).ifPresent(criteriaQuery::where);
-    }
   }
 
   @Override

@@ -24,7 +24,6 @@ import kirill.detachedjpacriteria.expression.impl.AttributePath;
 import kirill.detachedjpacriteria.expression.impl.DetachedExpressionCommonImpl;
 import kirill.detachedjpacriteria.expression.impl.ExpressionConverterContext;
 import kirill.detachedjpacriteria.expression.impl.PathContext;
-import kirill.detachedjpacriteria.expression.impl.extra.DetachedInNotTypeSafeImpl;
 import kirill.detachedjpacriteria.query.api.DetachedCommonCriteria;
 import kirill.detachedjpacriteria.query.api.DetachedCriteriaQuery;
 import kirill.detachedjpacriteria.query.api.QueryCopyPart;
@@ -92,218 +91,6 @@ public class DetachedCriteriaQueryImpl<T> extends AbstractDetachedCommonCriteria
 
   @Override
   public CriteriaQuery<T> createJpaCriteriaQuery(EntityManager entityManager) {
-    return createJpaCriteriaQueryImpl(entityManager);
-  }
-
-  @Override
-  public TypedQuery<T> createJpaQuery(EntityManager entityManager) {
-    return createJpaQueryImpl(entityManager);
-  }
-
-  @Override
-  public DetachedCriteriaQuery<Long> toCountCriteriaQuery(DetachedExpression<?> countExpression) {
-    return toCountCriteriaQueryImpl(false, countExpression);
-  }
-
-  @Override
-  public DetachedCriteriaQuery<Long> toCountDistinctCriteriaQuery(DetachedExpression<?> countExpression) {
-    return toCountCriteriaQueryImpl(true, countExpression);
-  }
-
-  private DetachedCriteriaQuery<Long> toCountCriteriaQueryImpl(boolean distinct, DetachedExpression<?> countExpression) {
-    if (!joins.isEmpty() && !fetches.isEmpty()) {
-      /*
-       * Надо объединить два дерева, но на практике это вряд ли кому-то нужно так что пока можно не делать. Оставить как есть нельзя потому что не
-       * будет селектиться то что фетчим.
-       */
-      throw new UnsupportedOperationException("Count when there are joins and fetches is not yet implemented, please contact library developers");
-    }
-
-    if (!havingExpressions.isEmpty() || !havingPredicates.isEmpty()|| !groupByExpressions.isEmpty()) {
-      throw new IllegalStateException("Can't count when grouping is involved");
-    }
-
-    DetachedCriteriaQuery<Long> selectCountQuery = distinct
-        ? DetachedCriteriaBuilder.selectCountDistinct(countExpression, fromClass)
-        : DetachedCriteriaBuilder.selectCount(countExpression, fromClass);
-
-    List<Join> joins = !this.joins.isEmpty() ? this.joins : fetches.stream().map(Fetch::toJoinDeep).collect(Collectors.toList());
-    selectCountQuery.join(joins);
-    selectCountQuery.copyFromOtherCriteria(this, QueryCopyPart.COPY_WHERE, QueryCopyPart.COPY_PARAMS);
-
-    return selectCountQuery;
-  }
-
-  @Override
-  public List<CriteriaQuery<T>> createJpaCriteriaBatchQueries(EntityManager entityManager, int batchSize) {
-    return createJpaCriteriaBatchQueriesImpl(entityManager, batchSize);
-  }
-
-  @Override
-  public List<TypedQuery<T>> createJpaBatchQueries(EntityManager entityManager, int batchSize) {
-    return createJpaBatchQueriesImpl(entityManager, batchSize);
-  }
-
-  @Override
-  public void copyFromOtherCriteria(DetachedCommonCriteria<?, ?, ?> otherCriteria, QueryCopyPart... copyParts) {
-    copyFromOtherCriteriaImpl(otherCriteria, copyParts);
-
-    Set<QueryCopyPart> copyPartSet = Arrays.stream(copyParts).collect(Collectors.toSet());
-
-    if (copyPartSet.contains(QueryCopyPart.COPY_DISTINCT) || copyPartSet.contains(QueryCopyPart.COPY_ALL_FIELDS)) {
-      if (otherCriteria instanceof CriteriaQueryWithDistinct) {
-        CriteriaQueryWithDistinct castedCriteria = (CriteriaQueryWithDistinct) otherCriteria;
-        this.distinct = castedCriteria.isDistinct();
-      }
-    }
-    if (copyPartSet.contains(QueryCopyPart.COPY_FETCH) || copyPartSet.contains(QueryCopyPart.COPY_ALL_FIELDS)) {
-      if (otherCriteria instanceof CriteriaQueryWithFetches) {
-        CriteriaQueryWithFetches castedCriteria = (CriteriaQueryWithFetches) otherCriteria;
-        this.fetches.clear();
-        this.fetches.addAll(castedCriteria.getFetches());
-      }
-    }
-    if (copyPartSet.contains(QueryCopyPart.COPY_JOIN) || copyPartSet.contains(QueryCopyPart.COPY_ALL_FIELDS)) {
-      if (otherCriteria instanceof CriteriaQueryWithJoins) {
-        CriteriaQueryWithJoins castedCriteria = (CriteriaQueryWithJoins) otherCriteria;
-        this.joins.clear();
-        this.joins.addAll(castedCriteria.getJoins());
-      }
-    }
-    if (copyPartSet.contains(QueryCopyPart.COPY_GROUP_BY) || copyPartSet.contains(QueryCopyPart.COPY_ALL_FIELDS)) {
-      if (otherCriteria instanceof CriteriaQueryWithGrouping) {
-        CriteriaQueryWithGrouping castedCriteria = (CriteriaQueryWithGrouping) otherCriteria;
-        this.groupByExpressions.clear();
-        this.groupByExpressions.addAll(castedCriteria.getGroupByExpressions());
-      }
-    }
-    if (copyPartSet.contains(QueryCopyPart.COPY_HAVING) || copyPartSet.contains(QueryCopyPart.COPY_ALL_FIELDS)) {
-      if (otherCriteria instanceof CriteriaQueryWithGrouping) {
-        CriteriaQueryWithGrouping castedCriteria = (CriteriaQueryWithGrouping) otherCriteria;
-        this.havingExpressions.clear();
-        this.havingExpressions.addAll(castedCriteria.getHavingExpressions());
-        this.havingPredicates.clear();
-        this.havingPredicates.addAll(castedCriteria.getHavingPredicates());
-      }
-    }
-    if (copyPartSet.contains(QueryCopyPart.COPY_ORDER) || copyPartSet.contains(QueryCopyPart.COPY_ALL_FIELDS)) {
-      if (otherCriteria instanceof CriteriaQueryWithOrder) {
-        CriteriaQueryWithOrder castedCriteria = (CriteriaQueryWithOrder) otherCriteria;
-        this.orders.clear();
-        this.orders.addAll(castedCriteria.getOrders());
-      }
-    }
-  }
-
-  @Override
-  public DetachedCriteriaQuery<T> groupBy(DetachedExpression<?>... groupByExpressions) {
-    return groupBy(List.of(groupByExpressions));
-  }
-
-  @Override
-  public DetachedCriteriaQuery<T> groupBy(List<DetachedExpression<?>> groupByExpressions) {
-    this.groupByExpressions.addAll(groupByExpressions);
-    return this;
-  }
-
-  @Override
-  public DetachedCriteriaQuery<T> having(DetachedExpression<Boolean> expression) {
-    havingExpressions.add(expression);
-    return this;
-  }
-
-  @Override
-  public DetachedCriteriaQuery<T> having(DetachedPredicate... predicates) {
-    return having(Arrays.asList(predicates));
-  }
-
-  @Override
-  public DetachedCriteriaQuery<T> having(Iterable<DetachedPredicate> predicates) {
-    wherePredicates.addAll(Util.toList(predicates));
-    return this;
-  }
-
-  @Override
-  public DetachedCriteriaQuery<T> orderByAsc(DetachedExpression<?>... expressions) {
-    return orderByAsc(Arrays.asList(expressions));
-  }
-
-  @Override
-  public DetachedCriteriaQuery<T> orderByAsc(List<DetachedExpression<?>> expressions) {
-    return orderBy(OrderBy.ASC, expressions);
-  }
-
-  @Override
-  public DetachedCriteriaQuery<T> orderByDesc(DetachedExpression<?>... expressions) {
-    return orderByDesc(Arrays.asList(expressions));
-  }
-
-  @Override
-  public DetachedCriteriaQuery<T> orderByDesc(List<DetachedExpression<?>> expressions) {
-    return orderBy(OrderBy.DESC, expressions);
-  }
-
-  @Override
-  public DetachedCriteriaQuery<T> orderBy(OrderBy orderBy, DetachedExpression<?>... expressions) {
-    return orderBy(orderBy, Arrays.asList(expressions));
-  }
-
-  @Override
-  public DetachedCriteriaQuery<T> orderBy(OrderBy orderBy, List<DetachedExpression<?>> expressions) {
-    this.orders.addAll(expressions.stream().map(expression -> new Order(orderBy, expression)).collect(Collectors.toList()));
-    return this;
-  }
-
-  @Override
-  public DetachedCriteriaQuery<T> distinct(boolean distinct) {
-    this.distinct = distinct;
-    return this;
-  }
-
-  @Override
-  public DetachedCriteriaQuery<T> innerFetch(String... attributeNames) {
-    return fetch(Arrays.stream(attributeNames).map(Fetch::innerFetch).collect(Collectors.toList()));
-  }
-
-  @Override
-  public DetachedCriteriaQuery<T> leftFetch(String... attributeNames) {
-    return fetch(Arrays.stream(attributeNames).map(Fetch::leftFetch).collect(Collectors.toList()));
-  }
-
-  @Override
-  public DetachedCriteriaQuery<T> fetch(Fetch... fetches) {
-    return fetch(Arrays.asList(fetches));
-  }
-
-  @Override
-  public DetachedCriteriaQuery<T> fetch(Iterable<Fetch> fetches) {
-    this.fetches.addAll(Util.toList(fetches));
-    return this;
-  }
-
-  @Override
-  public DetachedCriteriaQuery<T> innerJoin(String... attributeNames) {
-    return join(Arrays.stream(attributeNames).map(Join::innerJoin).collect(Collectors.toList()));
-  }
-
-  @Override
-  public DetachedCriteriaQuery<T> leftJoin(String... attributeNames) {
-    return join(Arrays.stream(attributeNames).map(Join::leftJoin).collect(Collectors.toList()));
-  }
-
-  @Override
-  public DetachedCriteriaQuery<T> join(Join... joins) {
-    return join(Arrays.asList(joins));
-  }
-
-  @Override
-  public DetachedCriteriaQuery<T> join(Iterable<Join> joins) {
-    this.joins.addAll(Util.toList(joins));
-    return this;
-  }
-
-  @Override
-  CriteriaQuery<T> createJpaCriteriaQuery(EntityManager entityManager, List<?> inValuesToReplace) {
     CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
 
     CriteriaQuery<T> criteriaQuery = criteriaBuilder.createQuery(resultClass);
@@ -319,7 +106,6 @@ public class DetachedCriteriaQueryImpl<T> extends AbstractDetachedCommonCriteria
         new PathContext(root, fetchPaths, joinPaths),
         null,
         parameters,
-        inValuesToReplace,
         criteriaBuilder,
         entityManager
     );
@@ -411,14 +197,9 @@ public class DetachedCriteriaQueryImpl<T> extends AbstractDetachedCommonCriteria
     for (Order order : orders) {
       Expression<?> jpaExpression = ((DetachedExpressionCommonImpl<?>) order.getExpression()).toJpaExpression(context);
       switch (order.getOrderBy()) {
-        case ASC:
-          orderList.add(context.getCriteriaBuilder().asc(jpaExpression));
-          break;
-        case DESC:
-          orderList.add(context.getCriteriaBuilder().desc(jpaExpression));
-          break;
-        default:
-          throw new IllegalStateException(String.format("Unexpected order %s, most likely a bug", order.getOrderBy()));
+        case ASC -> orderList.add(context.getCriteriaBuilder().asc(jpaExpression));
+        case DESC -> orderList.add(context.getCriteriaBuilder().desc(jpaExpression));
+        default -> throw new IllegalStateException(String.format("Unexpected order %s, most likely a bug", order.getOrderBy()));
       }
     }
 
@@ -426,23 +207,194 @@ public class DetachedCriteriaQueryImpl<T> extends AbstractDetachedCommonCriteria
   }
 
   @Override
-  void assertApplicableForBatching(int batchSize) {
-    super.assertApplicableForBatching(batchSize);
-
-    assertNoInPredicates(groupByExpressions, "group by");
-    assertNoInPredicates(havingExpressions, "having");
-    assertNoInPredicates(havingPredicates, "having");
-    assertNoInPredicates(orders.stream().map(Order::getExpression).collect(Collectors.toList()), "order by");
+  public TypedQuery<T> createJpaQuery(EntityManager entityManager) {
+    return createJpaQueryImpl(entityManager);
   }
 
-  private void assertNoInPredicates(List<? extends DetachedExpression<?>> expressions, String location) {
-    boolean haveInPredicates = expressions.stream()
-        .map(expression -> (DetachedExpressionCommonImpl<?>) expression)
-        .flatMap(expression -> expression.getAllExpressionsDeep().stream())
-        .anyMatch(expression -> expression instanceof DetachedInNotTypeSafeImpl);
-    if (haveInPredicates) {
-      throw new IllegalStateException(String.format("IN expression is not allowed inside %s", location));
+  @Override
+  public DetachedCriteriaQuery<Long> toCountCriteriaQuery(DetachedExpression<?> countExpression) {
+    return toCountCriteriaQueryImpl(false, countExpression);
+  }
+
+  @Override
+  public DetachedCriteriaQuery<Long> toCountDistinctCriteriaQuery(DetachedExpression<?> countExpression) {
+    return toCountCriteriaQueryImpl(true, countExpression);
+  }
+
+  private DetachedCriteriaQuery<Long> toCountCriteriaQueryImpl(boolean distinct, DetachedExpression<?> countExpression) {
+    if (!joins.isEmpty() && !fetches.isEmpty()) {
+      /*
+       * Надо объединить два дерева, но на практике это вряд ли кому-то нужно так что пока можно не делать. Оставить как есть нельзя потому что не
+       * будет селектиться то что фетчим.
+       */
+      throw new UnsupportedOperationException("Count when there are joins and fetches is not yet implemented, please contact library developers");
     }
+
+    if (!havingExpressions.isEmpty() || !havingPredicates.isEmpty()|| !groupByExpressions.isEmpty()) {
+      throw new IllegalStateException("Can't count when grouping is involved");
+    }
+
+    DetachedCriteriaQuery<Long> selectCountQuery = distinct
+        ? DetachedCriteriaBuilder.selectCountDistinct(countExpression, fromClass)
+        : DetachedCriteriaBuilder.selectCount(countExpression, fromClass);
+
+    List<Join> joins = !this.joins.isEmpty() ? this.joins : fetches.stream().map(Fetch::toJoinDeep).collect(Collectors.toList());
+    selectCountQuery.join(joins);
+    selectCountQuery.copyFromOtherCriteria(this, QueryCopyPart.COPY_WHERE, QueryCopyPart.COPY_PARAMS);
+
+    return selectCountQuery;
+  }
+
+  @Override
+  public void copyFromOtherCriteria(DetachedCommonCriteria<?, ?, ?> otherCriteria, QueryCopyPart... copyParts) {
+    copyFromOtherCriteriaImpl(otherCriteria, copyParts);
+
+    Set<QueryCopyPart> copyPartSet = Arrays.stream(copyParts).collect(Collectors.toSet());
+
+    if (copyPartSet.contains(QueryCopyPart.COPY_DISTINCT) || copyPartSet.contains(QueryCopyPart.COPY_ALL_FIELDS)) {
+      if (otherCriteria instanceof CriteriaQueryWithDistinct castedCriteria) {
+        this.distinct = castedCriteria.isDistinct();
+      }
+    }
+    if (copyPartSet.contains(QueryCopyPart.COPY_FETCH) || copyPartSet.contains(QueryCopyPart.COPY_ALL_FIELDS)) {
+      if (otherCriteria instanceof CriteriaQueryWithFetches castedCriteria) {
+        this.fetches.clear();
+        this.fetches.addAll(castedCriteria.getFetches());
+      }
+    }
+    if (copyPartSet.contains(QueryCopyPart.COPY_JOIN) || copyPartSet.contains(QueryCopyPart.COPY_ALL_FIELDS)) {
+      if (otherCriteria instanceof CriteriaQueryWithJoins castedCriteria) {
+        this.joins.clear();
+        this.joins.addAll(castedCriteria.getJoins());
+      }
+    }
+    if (copyPartSet.contains(QueryCopyPart.COPY_GROUP_BY) || copyPartSet.contains(QueryCopyPart.COPY_ALL_FIELDS)) {
+      if (otherCriteria instanceof CriteriaQueryWithGrouping castedCriteria) {
+        this.groupByExpressions.clear();
+        this.groupByExpressions.addAll(castedCriteria.getGroupByExpressions());
+      }
+    }
+    if (copyPartSet.contains(QueryCopyPart.COPY_HAVING) || copyPartSet.contains(QueryCopyPart.COPY_ALL_FIELDS)) {
+      if (otherCriteria instanceof CriteriaQueryWithGrouping castedCriteria) {
+        this.havingExpressions.clear();
+        this.havingExpressions.addAll(castedCriteria.getHavingExpressions());
+        this.havingPredicates.clear();
+        this.havingPredicates.addAll(castedCriteria.getHavingPredicates());
+      }
+    }
+    if (copyPartSet.contains(QueryCopyPart.COPY_ORDER) || copyPartSet.contains(QueryCopyPart.COPY_ALL_FIELDS)) {
+      if (otherCriteria instanceof CriteriaQueryWithOrder castedCriteria) {
+        this.orders.clear();
+        this.orders.addAll(castedCriteria.getOrders());
+      }
+    }
+  }
+
+  @Override
+  public DetachedCriteriaQuery<T> groupBy(DetachedExpression<?>... groupByExpressions) {
+    return groupBy(List.of(groupByExpressions));
+  }
+
+  @Override
+  public DetachedCriteriaQuery<T> groupBy(List<DetachedExpression<?>> groupByExpressions) {
+    this.groupByExpressions.addAll(groupByExpressions);
+    return this;
+  }
+
+  @Override
+  public DetachedCriteriaQuery<T> having(DetachedExpression<Boolean> expression) {
+    havingExpressions.add(expression);
+    return this;
+  }
+
+  @Override
+  public DetachedCriteriaQuery<T> having(DetachedPredicate... predicates) {
+    return having(Arrays.asList(predicates));
+  }
+
+  @Override
+  public DetachedCriteriaQuery<T> having(Iterable<DetachedPredicate> predicates) {
+    wherePredicates.addAll(Util.toList(predicates));
+    return this;
+  }
+
+  @Override
+  public DetachedCriteriaQuery<T> orderByAsc(DetachedExpression<?>... expressions) {
+    return orderByAsc(Arrays.asList(expressions));
+  }
+
+  @Override
+  public DetachedCriteriaQuery<T> orderByAsc(List<DetachedExpression<?>> expressions) {
+    return orderBy(OrderBy.ASC, expressions);
+  }
+
+  @Override
+  public DetachedCriteriaQuery<T> orderByDesc(DetachedExpression<?>... expressions) {
+    return orderByDesc(Arrays.asList(expressions));
+  }
+
+  @Override
+  public DetachedCriteriaQuery<T> orderByDesc(List<DetachedExpression<?>> expressions) {
+    return orderBy(OrderBy.DESC, expressions);
+  }
+
+  @Override
+  public DetachedCriteriaQuery<T> orderBy(OrderBy orderBy, DetachedExpression<?>... expressions) {
+    return orderBy(orderBy, Arrays.asList(expressions));
+  }
+
+  @Override
+  public DetachedCriteriaQuery<T> orderBy(OrderBy orderBy, List<DetachedExpression<?>> expressions) {
+    this.orders.addAll(expressions.stream().map(expression -> new Order(orderBy, expression)).toList());
+    return this;
+  }
+
+  @Override
+  public DetachedCriteriaQuery<T> distinct(boolean distinct) {
+    this.distinct = distinct;
+    return this;
+  }
+
+  @Override
+  public DetachedCriteriaQuery<T> innerFetch(String... attributeNames) {
+    return fetch(Arrays.stream(attributeNames).map(Fetch::innerFetch).collect(Collectors.toList()));
+  }
+
+  @Override
+  public DetachedCriteriaQuery<T> leftFetch(String... attributeNames) {
+    return fetch(Arrays.stream(attributeNames).map(Fetch::leftFetch).collect(Collectors.toList()));
+  }
+
+  @Override
+  public DetachedCriteriaQuery<T> fetch(Fetch... fetches) {
+    return fetch(Arrays.asList(fetches));
+  }
+
+  @Override
+  public DetachedCriteriaQuery<T> fetch(Iterable<Fetch> fetches) {
+    this.fetches.addAll(Util.toList(fetches));
+    return this;
+  }
+
+  @Override
+  public DetachedCriteriaQuery<T> innerJoin(String... attributeNames) {
+    return join(Arrays.stream(attributeNames).map(Join::innerJoin).collect(Collectors.toList()));
+  }
+
+  @Override
+  public DetachedCriteriaQuery<T> leftJoin(String... attributeNames) {
+    return join(Arrays.stream(attributeNames).map(Join::leftJoin).collect(Collectors.toList()));
+  }
+
+  @Override
+  public DetachedCriteriaQuery<T> join(Join... joins) {
+    return join(Arrays.asList(joins));
+  }
+
+  @Override
+  public DetachedCriteriaQuery<T> join(Iterable<Join> joins) {
+    this.joins.addAll(Util.toList(joins));
+    return this;
   }
 
   @Override

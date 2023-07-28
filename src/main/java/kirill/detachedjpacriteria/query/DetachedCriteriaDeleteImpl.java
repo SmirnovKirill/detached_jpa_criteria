@@ -1,6 +1,5 @@
 package kirill.detachedjpacriteria.query;
 
-import java.util.List;
 import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -60,7 +59,31 @@ public class DetachedCriteriaDeleteImpl<T> extends AbstractDetachedCommonCriteri
 
   @Override
   public CriteriaDelete<T> createJpaCriteriaQuery(EntityManager entityManager) {
-    return createJpaCriteriaQueryImpl(entityManager);
+    CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+
+    CriteriaDelete<T> criteriaQuery = criteriaBuilder.createCriteriaDelete(entityClass);
+    Root<?> root = criteriaQuery.from(entityClass);
+
+    ExpressionConverterContext context = new ExpressionConverterContext(
+        new PathContext(root, Map.of(), Map.of()),
+        null,
+        parameters,
+        criteriaBuilder,
+        entityManager
+    );
+    context.setCriteria(criteriaQuery);
+    setWhere(criteriaQuery, context);
+
+    return criteriaQuery;
+  }
+
+  private void setWhere(CriteriaDelete<T> criteriaQuery, ExpressionConverterContext context) {
+    Expression<Boolean> jpaExpression = getSingleJpaExpression(whereExpressions, wherePredicates, context).orElse(null);
+    if (jpaExpression != null) {
+      criteriaQuery.where(jpaExpression);
+    } else {
+      getSingleJpaPredicate(whereExpressions, wherePredicates, context).ifPresent(criteriaQuery::where);
+    }
   }
 
   @Override
@@ -83,48 +106,8 @@ public class DetachedCriteriaDeleteImpl<T> extends AbstractDetachedCommonCriteri
   }
 
   @Override
-  public List<CriteriaDelete<T>> createJpaCriteriaBatchQueries(EntityManager entityManager, int batchSize) {
-    return createJpaCriteriaBatchQueriesImpl(entityManager, batchSize);
-  }
-
-  @Override
-  public List<Query> createJpaBatchQueries(EntityManager entityManager, int batchSize) {
-    return createJpaBatchQueriesImpl(entityManager, batchSize);
-  }
-
-  @Override
   public void copyFromOtherCriteria(DetachedCommonCriteria<?, ?, ?> otherCriteria, QueryCopyPart... copyParts) {
     copyFromOtherCriteriaImpl(otherCriteria, copyParts);
-  }
-
-  @Override
-  CriteriaDelete<T> createJpaCriteriaQuery(EntityManager entityManager, List<?> inValuesToReplace) {
-    CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-
-    CriteriaDelete<T> criteriaQuery = criteriaBuilder.createCriteriaDelete(entityClass);
-    Root<?> root = criteriaQuery.from(entityClass);
-
-    ExpressionConverterContext context = new ExpressionConverterContext(
-        new PathContext(root, Map.of(), Map.of()),
-        null,
-        parameters,
-        inValuesToReplace,
-        criteriaBuilder,
-        entityManager
-    );
-    context.setCriteria(criteriaQuery);
-    setWhere(criteriaQuery, context);
-
-    return criteriaQuery;
-  }
-
-  private void setWhere(CriteriaDelete<T> criteriaQuery, ExpressionConverterContext context) {
-    Expression<Boolean> jpaExpression = getSingleJpaExpression(whereExpressions, wherePredicates, context).orElse(null);
-    if (jpaExpression != null) {
-      criteriaQuery.where(jpaExpression);
-    } else {
-      getSingleJpaPredicate(whereExpressions, wherePredicates, context).ifPresent(criteriaQuery::where);
-    }
   }
 
   @Override

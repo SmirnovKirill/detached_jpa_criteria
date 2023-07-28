@@ -6,7 +6,6 @@ import static java.util.stream.Collectors.toList;
 import java.util.stream.Stream;
 import javax.persistence.criteria.JoinType;
 import kirill.detachedjpacriteria.util.Util;
-import static kirill.detachedjpacriteria.util.Util.unmodifiableUnion;
 
 /**
  * Класс иммутабельный и поэтому thread-safe.

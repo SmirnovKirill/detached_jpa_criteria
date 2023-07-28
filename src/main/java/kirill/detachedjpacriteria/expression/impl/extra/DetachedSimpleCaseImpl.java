@@ -3,11 +3,11 @@ package kirill.detachedjpacriteria.expression.impl.extra;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-import kirill.detachedjpacriteria.expression.impl.DetachedExpressionImpl;
-import kirill.detachedjpacriteria.expression.impl.DetachedExpressionType;
 import kirill.detachedjpacriteria.expression.api.DetachedCriteriaBuilder;
 import kirill.detachedjpacriteria.expression.api.DetachedExpression;
 import kirill.detachedjpacriteria.expression.api.extra.DetachedSimpleCase;
+import kirill.detachedjpacriteria.expression.impl.DetachedExpressionImpl;
+import kirill.detachedjpacriteria.expression.impl.DetachedExpressionType;
 
 public class DetachedSimpleCaseImpl<C, R> extends DetachedExpressionImpl<R> implements DetachedSimpleCase<C, R> {
   private final List<When<?, ?>> whenList;

@@ -4,11 +4,11 @@ package kirill.detachedjpacriteria.expression.impl.extra;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-import kirill.detachedjpacriteria.expression.impl.DetachedExpressionImpl;
-import kirill.detachedjpacriteria.expression.impl.DetachedExpressionType;
 import static kirill.detachedjpacriteria.expression.api.DetachedCriteriaBuilder.literal;
 import kirill.detachedjpacriteria.expression.api.DetachedExpression;
 import kirill.detachedjpacriteria.expression.api.extra.DetachedCoalesce;
+import kirill.detachedjpacriteria.expression.impl.DetachedExpressionImpl;
+import kirill.detachedjpacriteria.expression.impl.DetachedExpressionType;
 
 public class DetachedCoalesceImpl<T> extends DetachedExpressionImpl<T> implements DetachedCoalesce<T> {
   private final List<DetachedExpression<?>> values;
