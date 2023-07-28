@@ -6,11 +6,6 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import kirill.detachedjpacriteria.AbstractTest;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import kirill.detachedjpacriteria.entity.UserDb;
 import kirill.detachedjpacriteria.entity.UserType;
 import static kirill.detachedjpacriteria.expression.api.DetachedCriteriaBuilder.equal;
@@ -20,6 +15,11 @@ import static kirill.detachedjpacriteria.expression.api.DetachedCriteriaBuilder.
 import static kirill.detachedjpacriteria.expression.api.DetachedCriteriaBuilder.path;
 import static kirill.detachedjpacriteria.expression.api.DetachedCriteriaBuilder.selectEntity;
 import kirill.detachedjpacriteria.query.api.DetachedCriteriaQuery;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class ParametersTest extends AbstractTest {
   @BeforeEach

@@ -8,14 +8,6 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import kirill.detachedjpacriteria.AbstractTest;
-import org.hibernate.LazyInitializationException;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import kirill.detachedjpacriteria.entity.CommentDb;
 import kirill.detachedjpacriteria.entity.UserDb;
 import static kirill.detachedjpacriteria.expression.api.DetachedCriteriaBuilder.and;
@@ -33,6 +25,14 @@ import static kirill.detachedjpacriteria.expression.api.DetachedCriteriaBuilder.
 import static kirill.detachedjpacriteria.expression.api.DetachedCriteriaBuilder.selectEntity;
 import kirill.detachedjpacriteria.expression.api.DetachedExpression;
 import kirill.detachedjpacriteria.query.api.DetachedCriteriaQuery;
+import org.hibernate.LazyInitializationException;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class CriteriaQueryTest extends AbstractTest {
   @BeforeEach

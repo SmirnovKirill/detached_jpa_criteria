@@ -1,14 +1,8 @@
 package kirill.detachedjpacriteria.query;
 
-import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.Tuple;
-import javax.persistence.TypedQuery;
 import kirill.detachedjpacriteria.AbstractTest;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import kirill.detachedjpacriteria.entity.CommentDb;
 import kirill.detachedjpacriteria.entity.PostDb;
 import kirill.detachedjpacriteria.entity.UserDb;
@@ -29,6 +23,10 @@ import kirill.detachedjpacriteria.query.api.DetachedCriteriaDelete;
 import kirill.detachedjpacriteria.query.api.DetachedCriteriaQuery;
 import kirill.detachedjpacriteria.query.api.DetachedCriteriaUpdate;
 import kirill.detachedjpacriteria.query.api.QueryCopyPart;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class ExamplesFromReadmeTest extends AbstractTest {
   @BeforeEach
@@ -162,20 +160,6 @@ public class ExamplesFromReadmeTest extends AbstractTest {
 
     int rowsDeleted = readInTransaction(entityManager -> criteriaDelete.createJpaQuery(entityManager).executeUpdate());
     assertEquals(10, rowsDeleted);
-  }
-
-  @Test
-  public void testSelectBatch() {
-    DetachedCriteriaQuery<UserDb> criteriaQuery = selectEntity(UserDb.class)
-        .where(path("login").in(List.of("user-7", "user-6", "user-1", "user-9", "user-5")));
-
-    List<UserDb> users = new ArrayList<>();
-    doInTransaction(entityManager -> {
-      for (TypedQuery<UserDb> query : criteriaQuery.createJpaBatchQueries(entityManager, 2)) {
-        users.addAll(query.getResultList());
-      }
-    });
-    assertEquals(5, users.size());
   }
 
   @Test

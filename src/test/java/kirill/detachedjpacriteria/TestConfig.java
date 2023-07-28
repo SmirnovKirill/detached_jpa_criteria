@@ -4,6 +4,10 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import java.util.Properties;
 import javax.sql.DataSource;
+import kirill.detachedjpacriteria.entity.CommentDb;
+import kirill.detachedjpacriteria.entity.PostDb;
+import kirill.detachedjpacriteria.entity.UserDb;
+import kirill.detachedjpacriteria.query.MultiIdTest;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.config.PropertiesFactoryBean;
 import org.springframework.context.annotation.Bean;
@@ -13,10 +17,6 @@ import org.springframework.orm.hibernate5.HibernateTransactionManager;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-import kirill.detachedjpacriteria.entity.CommentDb;
-import kirill.detachedjpacriteria.entity.PostDb;
-import kirill.detachedjpacriteria.entity.UserDb;
-import kirill.detachedjpacriteria.query.MultiIdTest;
 
 @Configuration
 @EnableTransactionManagement

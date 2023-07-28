@@ -11,12 +11,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
-import org.hibernate.SessionFactory;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import kirill.detachedjpacriteria.entity.CommentDb;
 import kirill.detachedjpacriteria.entity.PostDb;
 import kirill.detachedjpacriteria.entity.UserDb;
@@ -26,6 +20,11 @@ import static kirill.detachedjpacriteria.expression.api.DetachedCriteriaBuilder.
 import kirill.detachedjpacriteria.query.api.DetachedCriteriaDelete;
 import kirill.detachedjpacriteria.query.api.DetachedCriteriaQuery;
 import kirill.detachedjpacriteria.query.api.DetachedCriteriaUpdate;
+import org.hibernate.SessionFactory;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = TestConfig.class)
@@ -135,17 +134,6 @@ public abstract class AbstractTest {
 
   protected long getCount(DetachedCriteriaQuery<?> criteriaQuery) {
     return readInTransaction(entityManager -> criteriaQuery.toCountCriteriaQuery(root()).createJpaQuery(entityManager).getSingleResult());
-  }
-
-  protected <T> List<T> getResultListWithBatches(DetachedCriteriaQuery<T> criteriaQuery) {
-    return readInTransaction(entityManager -> {
-      List<T> result = new ArrayList<>();
-      for (TypedQuery<T> query : criteriaQuery.createJpaBatchQueries(entityManager, 2)) {
-        result.addAll(query.getResultList());
-      }
-
-      return result;
-    });
   }
 
   protected int runDelete(DetachedCriteriaDelete<?> criteriaDelete) {

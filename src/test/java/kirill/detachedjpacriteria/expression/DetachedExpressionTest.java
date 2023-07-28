@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import javax.persistence.Tuple;
 import kirill.detachedjpacriteria.AbstractTest;
+import kirill.detachedjpacriteria.entity.UserDb;
 import kirill.detachedjpacriteria.expression.api.DetachedCriteriaBuilder;
 import kirill.detachedjpacriteria.expression.api.DetachedExpression;
 import kirill.detachedjpacriteria.expression.impl.DetachedExpressionImpl;
@@ -12,17 +13,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import kirill.detachedjpacriteria.entity.UserDb;
-import static kirill.detachedjpacriteria.expression.api.DetachedCriteriaBuilder.and;
-import static kirill.detachedjpacriteria.expression.api.DetachedCriteriaBuilder.coalesce;
-import static kirill.detachedjpacriteria.expression.api.DetachedCriteriaBuilder.concat;
-import static kirill.detachedjpacriteria.expression.api.DetachedCriteriaBuilder.equal;
-import static kirill.detachedjpacriteria.expression.api.DetachedCriteriaBuilder.gt;
-import static kirill.detachedjpacriteria.expression.api.DetachedCriteriaBuilder.multiselect;
-import static kirill.detachedjpacriteria.expression.api.DetachedCriteriaBuilder.or;
-import static kirill.detachedjpacriteria.expression.api.DetachedCriteriaBuilder.select;
-import static kirill.detachedjpacriteria.expression.api.DetachedCriteriaBuilder.selectCase;
-import static kirill.detachedjpacriteria.expression.api.DetachedCriteriaBuilder.sum;
 
 public class DetachedExpressionTest extends AbstractTest {
   @BeforeEach

@@ -2,9 +2,6 @@ package kirill.detachedjpacriteria.query;
 
 import java.util.List;
 import kirill.detachedjpacriteria.AbstractTest;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import kirill.detachedjpacriteria.entity.CommentDb;
 import static kirill.detachedjpacriteria.expression.api.DetachedCriteriaBuilder.delete;
 import static kirill.detachedjpacriteria.expression.api.DetachedCriteriaBuilder.equal;
@@ -13,6 +10,9 @@ import static kirill.detachedjpacriteria.expression.api.DetachedCriteriaBuilder.
 import static kirill.detachedjpacriteria.expression.api.DetachedCriteriaBuilder.path;
 import static kirill.detachedjpacriteria.expression.api.DetachedCriteriaBuilder.selectEntity;
 import kirill.detachedjpacriteria.query.api.DetachedCriteriaDelete;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class CriteriaDeleteTest extends AbstractTest {
   @BeforeEach

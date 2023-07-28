@@ -13,9 +13,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import static kirill.detachedjpacriteria.expression.api.DetachedCriteriaBuilder.coalesce;
-import static kirill.detachedjpacriteria.expression.api.DetachedCriteriaBuilder.equal;
-import static kirill.detachedjpacriteria.expression.api.DetachedCriteriaBuilder.multiselect;
 
 public class HibernateImplAndLibErrorCornerCasesTest extends AbstractTest {
   @BeforeEach

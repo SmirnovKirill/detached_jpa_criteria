@@ -9,12 +9,12 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.metamodel.IdentifiableType;
 import kirill.detachedjpacriteria.AbstractTest;
+import static kirill.detachedjpacriteria.expression.api.DetachedCriteriaBuilder.id;
+import static kirill.detachedjpacriteria.expression.api.DetachedCriteriaBuilder.select;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.Test;
-import static kirill.detachedjpacriteria.expression.api.DetachedCriteriaBuilder.id;
-import static kirill.detachedjpacriteria.expression.api.DetachedCriteriaBuilder.select;
 
 public class MultiIdTest extends AbstractTest {
   @Test

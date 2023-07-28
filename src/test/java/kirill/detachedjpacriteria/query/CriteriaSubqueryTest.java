@@ -2,9 +2,6 @@ package kirill.detachedjpacriteria.query;
 
 import java.util.List;
 import kirill.detachedjpacriteria.AbstractTest;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import kirill.detachedjpacriteria.entity.UserDb;
 import static kirill.detachedjpacriteria.expression.api.DetachedCriteriaBuilder.equal;
 import static kirill.detachedjpacriteria.expression.api.DetachedCriteriaBuilder.exists;
@@ -20,6 +17,9 @@ import static kirill.detachedjpacriteria.expression.api.DetachedCriteriaBuilder.
 import static kirill.detachedjpacriteria.expression.api.DetachedCriteriaBuilder.selectEntity;
 import static kirill.detachedjpacriteria.expression.api.DetachedCriteriaBuilder.subquerySelect;
 import static kirill.detachedjpacriteria.expression.api.DetachedCriteriaBuilder.subquerySelectEntity;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class CriteriaSubqueryTest extends AbstractTest {
   @BeforeEach

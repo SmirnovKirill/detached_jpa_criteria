@@ -2,16 +2,13 @@ package kirill.detachedjpacriteria.query;
 
 import java.util.List;
 import kirill.detachedjpacriteria.AbstractTest;
+import kirill.detachedjpacriteria.entity.CommentDb;
 import kirill.detachedjpacriteria.expression.api.DetachedCriteriaBuilder;
 import kirill.detachedjpacriteria.expression.api.DetachedPath;
 import kirill.detachedjpacriteria.query.api.DetachedCriteriaUpdate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import kirill.detachedjpacriteria.entity.CommentDb;
-import static kirill.detachedjpacriteria.expression.api.DetachedCriteriaBuilder.equal;
-import static kirill.detachedjpacriteria.expression.api.DetachedCriteriaBuilder.like;
-import static kirill.detachedjpacriteria.expression.api.DetachedCriteriaBuilder.or;
 
 public class CriteriaUpdateTest extends AbstractTest {
   @BeforeEach
